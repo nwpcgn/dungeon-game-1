@@ -38,8 +38,7 @@
 	<svg class="nwp-icon"><use xlink:href="#{name}"></use></svg>
 {/snippet}
 
-
-<div class="flex gap-2 py-2 flex-wrap">
+<div class="flex flex-wrap gap-2 py-2">
 	{#each alertSlugs as item}
 		<button
 			class="btn btn-square btn-lg"
@@ -56,12 +55,11 @@
 		</button>
 	{/each}
 </div>
-<div class="collapse bg-base-100 border-base-300 border">
+<div class="bg-base-100 border-base-300 collapse border">
 	<input type="checkbox" />
-	<div class="collapse-title font-semibold font-mono">Message Data</div>
+	<div class="collapse-title font-mono font-semibold">Message Data</div>
 	<div class="collapse-content">
-
-		<textarea class="textarea w-full h-96" placeholder="Bio"
+		<textarea class="textarea h-96 w-full" placeholder="Bio"
 			>{JSON.stringify(groupList, null, 4)}</textarea>
 	</div>
 </div>

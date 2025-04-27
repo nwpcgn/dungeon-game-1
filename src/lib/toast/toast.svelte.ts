@@ -18,6 +18,7 @@ class Notes {
 		const obj = { ...def, ...note, id }
 		this.list.push(obj)
 		this.buffer.push(obj)
+		if (obj.delay) setTimeout(() => this.delNote(id), obj.delay)
 	}
 	delNote(id = '') {
 		this.list = this.list.filter((d) => d.id !== id)

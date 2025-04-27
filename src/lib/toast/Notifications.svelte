@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { notes } from './toast.svelte.js'
+	import { notes } from './notification.svelte.ts'
 	const atlas = {
 		success: {
 			style: 'alert-success',
@@ -42,9 +42,8 @@
 {#snippet alertT({ id, type, style, text })}
 	<div
 		role="alert"
-		class="alert alert-vertical sm:alert-horizontal alert-soft {atlas[
-			style
-		].style}">
+		class="alert alert-vertical sm:alert-horizontal alert-soft {atlas[style]
+			.style}">
 		{@render iconT('nwp-info')}
 		<span>{text}</span>
 		<div>
