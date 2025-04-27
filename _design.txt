@@ -1,0 +1,254 @@
+/*
+Dungeon Game Grundstruktur für Svelte 5 + webtui Terminal Look
+mit globalem Menü-Overlay, $state() Anbindung und ASCII-Animationen
+*/
+
+/src/lib/game.ts
+/src/routes/+layout.svelte
+/src/routes/+page.svelte
+/src/routes/game/inventory/+page.svelte
+/src/routes/game/dungeon/+page.svelte
+/src/routes/game/monster/+page.svelte
+/src/routes/game/battle/+page.svelte
+/src/routes/game/settings/+page.svelte
+/src/routes/+error.svelte
+/src/routes/+loading.svelte
+
+---
+
+// src/lib/game.ts
+
+import { state } from 'svelte';
+
+export const game = state({
+  player: { x: 10, y: 5, hp: 20, maxHp: 20 },
+  inventory: ['Potion', 'Sword', 'Shield'],
+  battleLog: [],
+  monsters: [
+    { name: 'Slime', hp: 10 },
+    { name: 'Goblin', hp: 15 },
+    { name: 'Bat', hp: 8 },
+  ],
+});
+
+---
+
+// src/routes/+layout.svelte
+
+<template>
+  <div class="border-double min-h-screen flex flex-col bg-base p-2 relative">
+    <header class="text-center p-2 border-b mb-2">
+      <slot name="header" />
+    </header>
+    <main class="flex-1 overflow-y-auto p-2">
+      <slot />
+    </main>
+    <footer class="text-center p-2 text-xs border-t mt-2 opacity-70">
+      RPG Game © 2025 - Press ESC for Menu
+    </footer>
+
+    {#if menuOpen}
+    <div class="absolute inset-0 bg-base/90 flex flex-col items-center justify-center z-50">
+      <h2 class="text-2xl mb-4">Menu</h2>
+      <nav class="flex flex-col gap-2 text-center">
+        <a class="hover:underline" href="/game/inventory">Inventory</a>
+        <a class="hover:underline" href="/game/dungeon">Dungeon</a>
+        <a class="hover:underline" href="/game/monster">Monsters</a>
+        <a class="hover:underline" href="/game/battle">Arena</a>
+        <a class="hover:underline" href="/game/settings">Settings</a>
+        <button class="mt-4 text-sm opacity-70" on:click={() => menuOpen = false}>
+          [Close Menu]
+        </button>
+      </nav>
+    </div>
+    {/if}
+  </div>
+</template>
+
+<script>
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  let menuOpen = false;
+
+  onMount(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Escape') {
+        menuOpen = !menuOpen;
+      }
+      if (e.key === 'Enter' && location.pathname === '/') {
+        goto('/game/dungeon');
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  });
+</script>
+
+---
+
+// src/routes/+page.svelte
+
+<template slot="header">
+  <h1 class="text-6xl font-bold">RPG GAME</h1>
+</template>
+
+<template>
+  <div class="flex flex-col items-center justify-center min-h-full text-center">
+    <p class="text-xl animate-blink">Press [Enter] to Start</p>
+  </div>
+</template>
+
+<style>
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 1.5s infinite;
+}
+</style>
+
+---
+
+// src/routes/game/inventory/+page.svelte
+
+<template slot="header">
+  <h2 class="text-2xl">Inventory</h2>
+</template>
+
+<script>
+  import { game } from '$lib/game';
+</script>
+
+<template>
+  <div class="grid grid-cols-2 gap-4">
+    <div class="border p-2 overflow-y-auto">
+      <ul>
+        {#each $game.inventory as item}
+          <li class="hover:bg-base cursor-pointer">* {item}</li>
+        {/each}
+      </ul>
+    </div>
+    <div class="border p-2">
+      <p>Select an item to view details.</p>
+    </div>
+  </div>
+</template>
+
+---
+
+// src/routes/game/dungeon/+page.svelte
+
+<template slot="header">
+  <h2 class="text-2xl">Dungeon Map</h2>
+</template>
+
+<script>
+  import { game } from '$lib/game';
+</script>
+
+<template>
+  <div class="grid grid-cols-20 gap-0.5 text-center text-sm leading-tight">
+    {#each Array(200) as _, i}
+      <div class="w-4 h-4">{i === $game.player.y * 20 + $game.player.x ? '@' : (i % 7 === 0 ? '#' : '.')}</div>
+    {/each}
+  </div>
+  <div class="mt-4 text-xs opacity-70">Legend: @ = Player, # = Wall, . = Floor</div>
+</template>
+
+---
+
+// src/routes/game/monster/+page.svelte
+
+<template slot="header">
+  <h2 class="text-2xl">Heroes / Monsters</h2>
+</template>
+
+<script>
+  import { game } from '$lib/game';
+</script>
+
+<template>
+  <div class="grid grid-cols-3 gap-2">
+    {#each $game.monsters as monster}
+      <div class="border p-2 text-center">
+        <div>ASCII-{monster.name.charAt(0)}</div>
+        <div class="mt-1">{monster.name}</div>
+      </div>
+    {/each}
+  </div>
+</template>
+
+---
+
+// src/routes/game/battle/+page.svelte
+
+<template slot="header">
+  <h2 class="text-2xl">Battle Arena</h2>
+</template>
+
+<script>
+  import { game } from '$lib/game';
+</script>
+
+<template>
+  <div class="flex flex-col justify-between min-h-full">
+    <div class="flex justify-center text-2xl">
+      @ vs M
+    </div>
+    <div class="border p-2 mt-4">
+      {#each $game.battleLog as log}
+        <p>> {log}</p>
+      {/each}
+    </div>
+    <div class="mt-4 text-center">
+      <button class="border p-1 mx-2" on:click={() => $game.battleLog.push('You attack!')}>Fight</button>
+      <button class="border p-1 mx-2">Item</button>
+      <button class="border p-1 mx-2">Run</button>
+    </div>
+  </div>
+</template>
+
+---
+
+// src/routes/game/settings/+page.svelte
+
+<template slot="header">
+  <h2 class="text-2xl">Settings</h2>
+</template>
+
+<template>
+  <div class="flex flex-col gap-2">
+    <label><input type="checkbox" checked> Enable Sound</label>
+    <label><input type="checkbox"> Show FPS</label>
+    <label>Difficulty:
+      <select>
+        <option>Easy</option>
+        <option selected>Normal</option>
+        <option>Hard</option>
+      </select>
+    </label>
+  </div>
+</template>
+
+---
+
+// src/routes/+error.svelte
+
+<template>
+  <div class="border-double p-8 text-center min-h-screen flex flex-col items-center justify-center">
+    <h1 class="text-4xl mb-4">Error!</h1>
+    <p>Something went wrong.</p>
+    <button class="border p-1 mt-4" on:click={() => goto('/')}>Back to Home</button>
+  </div>
+</template>
+
+---
+
+// src/routes/+loading.svelte
+
+<template>
+  <div class="border-double p-8 text-center min-h-screen flex flex-col items-center justify-center animate-pulse">
+    <h1 class="text-2xl">Loading...</h1>
+  </div>
+</template>

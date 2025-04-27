@@ -1,6 +1,17 @@
 @import 'tailwindcss';
-@plugin '@tailwindcss/typography';
-@plugin "daisyui";
+/* @plugin '@tailwindcss/typography';
+@plugin "daisyui"; */
+
+@layer base, utils, components;
+
+@import "@webtui/css/base.css";
+
+/* Utils */
+@import "@webtui/css/utils/box.css"; /*[!code ++]*/
+
+/* Components */
+@import "@webtui/css/components/button.css"; /*[!code ++]*/
+@import "@webtui/css/components/typography.css"; /*[!code ++]*/
 
 h1 {
 	@apply text-4xl font-bold;
